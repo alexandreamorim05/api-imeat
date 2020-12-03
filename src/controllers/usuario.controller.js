@@ -8,9 +8,6 @@ const { JWT_KEY } = process.env;
 // IMPORTANDO AS FUNÇÕES DE RETORNO PARA O USUÁRIO
 const { responseJson, responseErrorJson } = require('../utils/controller');
 
-// IMPORTANDO AS CONSTANTS DE TABELA. NOME DA TABELA NO BANCO DE DADOS
-const Tabelas = require('../database/tabelas.js');
-
 // IMPORTANDO O MODEL DE USUÁRIO.
 const UsuarioModel = require('../models/usuario.model.js');
 
@@ -22,10 +19,14 @@ const getAll = (req, res) => {
     try {
         UsuarioService.GetAll()
             .then((data) => {
-                responseJson(res, 'Buscando todos os usuários', data, httpStatus.OK);
+                //console.log(u);
+                responseJson(res, 'Usuário encontrado', data, httpStatus.OK);
+            })
+            .catch((error) => {
+                responseErrorJson(res, error);
             });
     } catch (error) {
-        responseErrorJson(res, error, httpStatus.INTERNAL_SERVER_ERROR);
+        responseErrorJson(res, error);
     }
 }
 
@@ -34,40 +35,86 @@ const get = (req, res) => {
     try {
         let idUsuario = req.params.id;
         UsuarioService.Get(idUsuario)
-            .then((data) => {
-                if (data) {
-                    responseJson(res, 'Buscando usuário por ID', data, httpStatus.OK);
-                } else {
-                    responseJson(res, 'Usuário não encontrado', null, httpStatus.NOT_FOUND);
-                }
+            .then((u) => {
+                //console.log(u);
+                responseJson(res, 'Usuário encontrado', u, httpStatus.OK);
+            })
+            .catch((error) => {
+                responseErrorJson(res, error);
             });
     } catch (error) {
-        responseErrorJson(res, error, httpStatus.INTERNAL_SERVER_ERROR);
+        responseErrorJson(res, error);
     }
 }
 
 // MÉTODO RESPONSA´VEL POR CRIAR UM NOVO USUÁRIO
 const post = (req, res) => {
+
+
     try {
 
         let usuario = new UsuarioModel();
         usuario.serialize(req.body);
 
         UsuarioService.Create(usuario)
-            .then((usuarioInserido) => {
-                responseJson(res, 'Usuário inserido com sucesso', usuarioInserido, httpStatus.CREATED);
+            .then((u) => {
+                //console.log(u);
+                responseJson(res, 'Usuário inserido', u, httpStatus.OK);
             })
             .catch((error) => {
-                responseErrorJson(res, error, httpStatus.INTERNAL_SERVER_ERROR);
+                responseErrorJson(res, error);
             });
 
     } catch (error) {
-        responseErrorJson(res, error, httpStatus.INTERNAL_SERVER_ERROR);
+        responseErrorJson(res, error);
     }
+
+    /*
+    try {
+
+        let usuario = new UsuarioModel();
+    usuario.serialize(req.body);
+
+        UsuarioService.Create(usuario)
+            .then(({usuarioInserido, cadastrado}) => {
+                if (cadastrado) {
+                    responseJson(res, 'Usuário já inserido', null, httpStatus.CONFLICT);
+                } else {
+                    responseJson(res, 'Usuário inserido com sucesso', usuarioInserido, httpStatus.CREATED);
+                }
+            })
+            .catch((error) => {
+                responseErrorJson(res, error);
+            });
+
+    } catch (error) {
+        responseErrorJson(res, error);
+    }
+    */
 }
 
 // MÉTODO RESPONSÁVEL POR EDITAR OS DADOS DOUSUÁRIO
 const put = (req, res) => {
+
+    try {
+
+        let idUsuario = req.params.id;
+        let usuario = new UsuarioModel();
+        usuario.serialize(req.body);
+
+        UsuarioService.Edit(idUsuario, usuario)
+            .then((u) => {
+                //console.log(u);
+                responseJson(res, 'Usuário Editado', u, httpStatus.OK);
+            })
+            .catch((error) => {
+                responseErrorJson(res, error);
+            });
+
+    } catch (error) {
+        responseErrorJson(res, error);
+    }
+    /*
     try {
         let idUsuario = req.params.id;
         let usuario = new UsuarioModel();
@@ -81,12 +128,13 @@ const put = (req, res) => {
                     });
             })
             .catch((error) => {
-                responseErrorJson(res, error, httpStatus.INTERNAL_SERVER_ERROR);
+                responseErrorJson(res, error);
             });
 
     } catch (error) {
-        responseErrorJson(res, error, httpStatus.INTERNAL_SERVER_ERROR);
+        responseErrorJson(res, error);
     }
+    */
 }
 
 // MÉTODO RESPONSÁVEL POR REMOVER O USUÁRIO PELO ID PASSADO
@@ -99,17 +147,19 @@ const remove = (req, res) => {
                 responseJson(res, 'Usuário removido com sucesso', null, httpStatus.OK);
             })
             .catch((error) => {
-                responseErrorJson(res, error, httpStatus.INTERNAL_SERVER_ERROR);
+                responseErrorJson(res, error);
             });
     } catch (error) {
-        responseErrorJson(res, error, httpStatus.INTERNAL_SERVER_ERROR);
+        responseErrorJson(res, error);
     }
 }
 
 // MÉTODO RESPONSÁVEL POR REALIZAR O LOGIN
 const login = (req, res) => {
+
+    // 
     try {
-        
+
         // GERANDO O TOKEN DE AUTENTICAÇÃO 
         let token = jwt.sign({
             id_usuario: 0,
@@ -119,29 +169,35 @@ const login = (req, res) => {
         });
 
         // PEGANDO O EMAIL E A SENHA DA REQUISIÇÃO
-        let { email, senha } = req.body;
+        let { email, senha, tipoUsuario } = req.body;
 
-        UsuarioService.Login(email, senha)
+        UsuarioService.Login(email, senha, tipoUsuario)
             .then(usuarioAutenticado => {
-                
+
                 // SE DEVOLVER UM OBJETO DE USUÁRIO SIGNIFICA QUE FOI ENCONTRADO NA BASE,
                 // SENDO ASSIM, MONTA UM OBJETO DE RESPOSTA COM O TOKEN GERADO ACIMA
                 if (usuarioAutenticado) {
-                    let data = {
-                        token: token,
-                        idUsuario: usuarioAutenticado.id,
-                        emailUsuario: usuarioAutenticado.email,
-                        nomeUsuario: (usuarioAutenticado.tipoUsuario == 'C') ?
-                            usuarioAutenticado.cliente.nome : usuarioAutenticado.estabelecimento.nome,
-                    }
-                    responseJson(res, 'Usuário autenticado com sucesso', data, httpStatus.OK);
+                    UsuarioService.GetDados(usuarioAutenticado.id, tipoUsuario)
+                        .then(dados => {
+                            
+                            let data = {
+                                token: token,
+                                tipoUsuario: tipoUsuario,
+                                data: dados
+                            }
+                            responseJson(res, 'Usuário autenticado com sucesso', data, httpStatus.OK);
+                        })
+                        .catch((error) => {
+                            responseJson(res, 'Usuário não autenticado', error, httpStatus.UNAUTHORIZED);
+                        })
+
                 } else {
                     responseJson(res, 'Usuário não autenticado', null, httpStatus.UNAUTHORIZED);
                 }
             });
 
     } catch (error) {
-        responseErrorJson(res, error, httpStatus.INTERNAL_SERVER_ERROR);
+        responseErrorJson(res, error);
     }
 }
 

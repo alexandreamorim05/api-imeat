@@ -1,6 +1,9 @@
+const UsuarioModel = require('./usuario.model');
+
 class EstabelecimentoModel {
+    id;
     nome;
-    cpnj;
+    cnpj;
     rua;
     bairro;
     numero;
@@ -10,6 +13,7 @@ class EstabelecimentoModel {
     cep;
 
     serialize(jsonBody) {
+        this.id = jsonBody.id || null;
         this.nome = jsonBody.nome || null;
         this.cnpj = jsonBody.cnpj || null;
         this.rua = jsonBody.rua || null;
@@ -19,6 +23,15 @@ class EstabelecimentoModel {
         this.estado = jsonBody.estado || null;
         this.complemento = jsonBody.complemento || null;
         this.cep = jsonBody.cep || null;
+
+        // CRIANDO O USUÁRIO
+        if (!jsonBody.usuario) {
+            this.usuario = null;
+        } else {
+            let usuario = new UsuarioModel();
+            usuario.serialize(jsonBody.usuario);
+            this.usuario = usuario;
+        }
     }
 }
 

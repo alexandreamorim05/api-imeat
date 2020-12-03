@@ -13,84 +13,88 @@
         },
     ],
 
-    // representação da tabela cliente
-    'cliente' = [
-        {
-            // DADOS DE CLIENTE
+        // representação da tabela cliente
+        'cliente' = [
+            {
+                // DADOS DE CLIENTE
 
-            'usuario' : {
+                'usuario': {
+                    'id': '',
+                    'email': ''
+                },
+
+                'listaDePedidos': [
+                    {
+                        'id': '',
+                        'dataPedido': '',
+                        'formaPagamento': '',
+                        'valorPedido': '',
+                        'qtdItens': '',
+                    }
+                ]
+            },
+        ],
+
+        // representação da tabela estabelecimento
+        'estabelecimento' = [
+            // DADOS DE ESTABELECIMENTO
+
+            'usuario' = {
                 'id': '',
                 'email': ''
             },
 
-            'listaDePedidos' : [
-                {
-                    'id': '',
-                    'dataPedido' : '',
-                    'formaPagamento' : '',
-                    'valorPedido' : '',
-                    'qtdItens' : '',
-                }
+            'cardapio' = [
+                'listaDeCategoria' = [
+                    'nome' = '',
+                    'descricao' = '',
+                    'listaDePrato' = [
+                        'prato' = {
+                            'nome': '',
+                            'ingredientes': '',
+                            'valor': ''
+                        }
+                    ]
+                ]
             ]
-        },
-    ],
+        ],
 
-    // representação da tabela estabelecimento
-    'estabelecimento' = [
-        // DADOS DE ESTABELECIMENTO
+        // representação da tabela pedidos
+        'pedidos' = [
+            // Dados pedido
+            'dataPedido' = '',
+            'formaPagamento' = '',
+            'valorPedido' = '',
 
-        'usuario' = {
-            'id': '',
-            'email': ''
-        },
+            // Todo create terá o sttus 1
+            'statusPedido' = '1',
 
-        'cardapio' = [
-            'listaDeCategoria' = [
-                'nome' = '',
-                'descricao' = '',
-                'listaDePrato' = [
-                    'prato' = {
+            // Cliente
+            'cliente' = {
+                'id': '',
+                'nome': '',
+                'Sobrenome': ''
+            },
+
+            'estabelecimento' = {
+                'id': '',
+                'nome': '',
+            },
+
+            'qtdItens' = '',
+            'listaDeItens' = [
+                {
+                    'categoria': {
+                        'nome': '',
+                        'descricao': '',
+                    },
+                    'prato': {
+                        'id': '',
                         'nome': '',
                         'ingredientes': '',
                         'valor': ''
-                    }
-                ]
+                    },
+                }
             ]
         ]
-    ],
-
-    // representação da tabela pedidos
-    'pedidos' = [
-        // Dados pedido
-        'dataPedido' = '',
-        'formaPagamento' = '',
-        'valorPedido' = '',
-
-        'statusPedido' = '1',
-
-        // Cliente
-        'cliente' = {
-
-        },
-
-        'estabelecimento' = {
-
-        },
-
-        'qtdItens' = '',
-        'listaDeItens' = [
-            {
-                'categoria': {
-                    'nome' : '',
-                    'descricao' : '',
-                },
-                'prato': {
-                    'id': '',
-                    'nome': '',
-                    'ingredientes': '',
-                    'valor': ''
-                },
-            }
-        ]
-    ]
 }
